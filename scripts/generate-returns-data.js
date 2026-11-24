@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
-const filePath = "src/data/returns.csv";
+const filePath = "test/fixtures/legacy-returns.csv";
 const targetGeneratedRows = 2000;
 const seedLinesToKeep = 26;
 

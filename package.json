@@ -1,5 +1,5 @@
 {
-  "name": "philips-dx-returns-dashboard",
+  "name": "dx-returns-ecommerce",
   "version": "1.1.1",
   "private": true,
   "type": "module",
@@ -8,6 +8,6 @@
     "start": "node scripts/dev-server.js",
     "build": "node scripts/build-static.js",
     "generate:data": "node scripts/generate-returns-data.js",
-    "test": "node --test src/lib/analytics.test.js"
+    "test": "node --test test/analytics.test.js"
   }
 }

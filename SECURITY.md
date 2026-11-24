@@ -26,7 +26,7 @@ If this concept is connected to a real LLM, the integration should follow these 
 - Keep system and developer instructions outside user-editable data.
 - Pass return notes and delay reasons as quoted evidence, not instructions.
 - Never include secrets, credentials, API keys, hidden prompts, or privileged policy text in model context.
-- Redact or minimize customer, partner, serial-number, patient, financial, and commercially sensitive data.
+- Redact or minimize customer, order, sales channel, financial, and commercially sensitive data.
 - Require every generated summary to cite return IDs and source fields.
 - Use allowlisted tools only; never let uploaded text choose tools, destinations, commands, recipients, or API actions.
 - Route escalations, email, Teams messages, writebacks, and status changes through human approval.
@@ -43,4 +43,4 @@ If this concept is connected to a real LLM, the integration should follow these 
 
 ## Remaining Enterprise Requirements
 
-A real Philips-style deployment would still need SSO, role-based access control, retention rules, audit logging, approved data classifications, incident handling, vendor review, and security sign-off before using real operational data.
+Before using live e-commerce returns data, configure SSO, role-based access control, retention rules, audit logging, incident handling, and approved controls for data classification and vendor access.

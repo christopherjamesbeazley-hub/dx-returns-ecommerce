@@ -1,3 +1,5 @@
+export const DASHBOARD_NAME = "E-commerce DX Returns";
+export const WEEKLY_REPORT_TITLE = `${DASHBOARD_NAME} Weekly Report`;
 export const SNAPSHOT_DATE = "2026-07-08";
 export const NEAR_DUE_DAYS = 5;
 export const REQUIRED_RETURN_COLUMNS = [
@@ -24,7 +26,7 @@ export const RETURN_COLUMN_ALIASES = {
   return_id: ["return id", "returnid", "id", "rma", "rma id", "case id", "returns id"],
   return_type: ["return type", "type", "category", "returns type"],
   market: ["market", "country", "region", "local market"],
-  partner: ["partner", "customer", "customer partner", "account", "hospital", "site"],
+  partner: ["partner", "sales channel", "customer", "customer partner", "account", "hospital", "site"],
   logistics_provider: ["logistics provider", "carrier", "3pl", "transport provider", "freight provider"],
   owner: ["owner", "responsible", "case owner", "action owner", "returns owner"],
   status: ["status", "return status", "current status", "stage"],
@@ -115,20 +117,20 @@ export function validateReturnsCsv(csvText) {
 
 export function buildReturnCsvTemplate() {
   const sample = [
-    "DXR-TEMPLATE-001",
-    "Service part",
+    "ECOM-TEMPLATE-001",
+    "Wrong item",
     "Germany",
-    "Demo Partner",
-    "Demo Carrier",
-    "Case Owner",
+    "Demo Webstore",
+    "Central Parcel Demo",
+    "DACH Returns",
     "Pickup pending",
     "2026-07-01",
     "2026-07-15",
     "2026-07-08",
     "",
-    "Example detector module",
+    "Canvas trainers | DEMO-APP-306",
     "1",
-    "25000",
+    "54.99",
     "EUR",
     "Awaiting pickup window",
     "Example row only; replace with real export data.",
@@ -251,7 +253,7 @@ export function buildStakeholderReport({ kpis, marketBreakdown, partnerPerforman
   const topPartners = partnerPerformance.slice(0, 3);
 
   return [
-    `DX Returns Weekly Control Report`,
+    WEEKLY_REPORT_TITLE,
     `Snapshot date: ${snapshotDate}`,
     ``,
     `Executive summary`,
@@ -271,7 +273,7 @@ export function buildStakeholderReport({ kpis, marketBreakdown, partnerPerforman
       (item) => `- ${item.market}: ${item.openCount} open, ${item.overdueCount} overdue, ${formatCurrency(item.exposure)} exposure`,
     ),
     ``,
-    `Partner performance signal`,
+    `Sales channel performance`,
     ...topPartners.map(
       (item) =>
         `- ${item.partner}: ${item.openCount} open, ${item.overdueCount} overdue, ${item.missingDueDateCount} missing due dates, ${formatCurrency(item.exposure)} exposure`,
@@ -294,9 +296,9 @@ export function buildEscalationDraft(item) {
     ``,
     `Hello ${item.owner},`,
     ``,
-    `${item.returnId} is currently marked as ${formatState(item.slaState)} in the DX Returns Control worklist.`,
+    `${item.returnId} is currently marked as ${formatState(item.slaState)} in the ${DASHBOARD_NAME} worklist.`,
     `Market: ${item.market}`,
-    `Partner: ${item.partner}`,
+    `Sales channel: ${item.partner}`,
     `Status: ${item.status}`,
     `${dueText}`,
     `Exposure: ${formatCurrency(item.valueEur)}`,
@@ -430,7 +432,7 @@ export function buildLlmBrief({
 }) {
   return {
     metadata: {
-      prototype: "DX Returns Control",
+      prototype: DASHBOARD_NAME,
       snapshotDate,
       dataClassification: "Synthetic demo data in this prototype; treat real deployments as confidential operational data.",
       purpose: "Generate a human-reviewed weekly returns-control narrative from deterministic dashboard facts.",
@@ -656,9 +658,9 @@ export function getEarlyWarnings({ marketBreakdown, partnerPerformance, themes, 
   if (topPartner) {
     warnings.push({
       type: "partner",
-      label: `${topPartner.partner} partner concentration`,
+      label: `Return concentration at ${topPartner.partner}`,
       signal: `${topPartner.openCount} open returns, ${topPartner.overdueCount} overdue, ${topPartner.missingDueDateCount} missing due dates.`,
-      action: "Use the scorecard in the next partner review and validate attribution before escalation.",
+      action: "Review the sales channel scorecard and confirm the cause before escalation.",
     });
   }
 
@@ -704,9 +706,9 @@ export function getContinuousImprovementActions({ kpis, themes, partnerPerforman
 
   if (topPartner) {
     actions.push({
-      area: "Partner management",
+      area: "Sales channel performance",
       recommendation: `Validate ${topPartner.partner} attribution and agree a corrective action rhythm if delays are confirmed.`,
-      impact: `${topPartner.overdueCount} overdue returns are currently linked to this partner.`,
+      impact: `${topPartner.overdueCount} overdue returns are currently linked to this sales channel.`,
     });
   }
 

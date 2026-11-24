@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: dx-returns-control
+    name: dx-returns-ecommerce
     env: node
     plan: free
     buildCommand: npm run build

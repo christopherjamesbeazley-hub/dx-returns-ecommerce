@@ -1,41 +1,38 @@
-# DX Returns Control
+# E-commerce DX Returns
 
-A returns-control dashboard for a direct-export rollout. Turn CSV exports into overdue worklists, inventory exposure metrics, snapshot comparisons, and stakeholder reports.
-
-**[Open the live demo](https://dx-returns-control.onrender.com/)**
-
-Explore 2,025 fictional returns directly in your browser.
+An e-commerce returns dashboard for tracking overdue cases, refund delays, and return value across markets, sales channels, and carriers. The dashboard loads 600 synthetic returns when it opens.
 
 ## The Problem
 
-Returns teams work across market updates, logistics partners, and spreadsheet exports. Missed deadlines, missing due dates, and high-value inventory can become difficult to track. This dashboard brings those records into an operational view.
+Returns teams reconcile store and marketplace exports with warehouse and carrier updates. The dashboard highlights missed deadlines, missing due dates, and high-value returns in one worklist.
 
 ## Who It Helps
 
-- Operations managers monitor overdue volume, SLA status, and inventory exposure.
+- Operations managers monitor overdue volume, SLA status, and financial exposure.
 - Coordinators filter worklists and prepare follow-up messages.
 - Leadership reviews recurring delays, snapshot changes, and stakeholder reports.
 
 ## Try It
 
-1. Open the demo and explore the role views.
-2. Upload the [baseline CSV](src/data/returns.csv) to capture the first upload snapshot.
-3. Upload the [status-update example](outputs/dx-returns-upload-status-demo.csv).
-4. Open Snapshots to compare the two uploads, then download a report.
+1. Open the dashboard to explore the built-in e-commerce data.
+2. Upload the [bundled CSV](src/data/dx-returns-ecommerce-demo-600.csv) to capture an upload snapshot.
+3. Upload a second CSV using the same format and open Snapshots to compare the uploads.
 
-Both files contain synthetic records in the full upload schema. Exported escalation worklists contain fewer columns and are intended for review.
+The bundled file uses the 18-column upload schema. The dashboard displays the `partner` field as **Sales channel**.
 
 ## Synthetic Example Results
 
 Calculated using the fixed assessment date of July 8, 2026.
 
-| Metric | Baseline | Status-update example |
-| --- | ---: | ---: |
-| Total records | 2,025 | 2,025 |
-| Open returns | 1,773 | 1,765 |
-| Overdue returns | 1,564 | 1,558 |
-| Closed returns | 252 | 260 |
-| Overdue exposure | EUR 57,518,127 | EUR 57,386,627 |
+| Metric | Demo |
+| --- | ---: |
+| Total records | 600 |
+| Open returns | 90 |
+| Overdue returns | 36 |
+| Near-due returns | 27 |
+| Missing due dates | 3 |
+| Closed or cancelled returns | 510 |
+| Overdue exposure | EUR 3,974.27 |
 
 These are demonstration calculations with fictional records. Real operational improvements and savings have yet to be measured. The Leadership view includes an ROI calculator with editable assumptions.
 

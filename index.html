@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DX Returns Control</title>
-    <link rel="stylesheet" href="/src/styles.css?v=20260709-v111-upload-refresh" />
+    <title>E-commerce DX Returns</title>
+    <link rel="stylesheet" href="./src/styles.css?v=20261124" />
   </head>
   <body>
     <div id="root">
       <main class="shell">
         <section class="startup-panel">
-          <p class="eyebrow">DX Returns Control</p>
+          <p class="eyebrow">E-commerce DX Returns</p>
           <h1>Loading dashboard</h1>
           <p>If this message stays on screen, the browser could not start the dashboard JavaScript or load the returns dataset.</p>
         </section>
@@ -20,7 +20,7 @@
       <main class="shell">
         <section class="startup-panel">
           <p class="eyebrow">JavaScript required</p>
-          <h1>DX Returns Control needs JavaScript enabled</h1>
+          <h1>E-commerce DX Returns needs JavaScript enabled</h1>
           <p>This prototype runs entirely in the browser and needs JavaScript to load the CSV and render the dashboard.</p>
         </section>
       </main>
@@ -40,7 +40,7 @@
       }, 5000);
     </script>
     <script type="module">
-      import("/src/static-app.js?v=20260709-v111-upload-refresh").catch(function (error) {
+      import("./src/static-app.js?v=20261124").catch(function (error) {
         var root = document.getElementById("root");
         var message = error && error.message ? error.message : String(error);
         if (root) {

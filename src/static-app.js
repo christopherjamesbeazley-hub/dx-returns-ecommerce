@@ -1,7 +1,9 @@
 const analytics = await loadAnalyticsModule();
 
 const {
+  DASHBOARD_NAME,
   SNAPSHOT_DATE,
+  WEEKLY_REPORT_TITLE,
   buildEscalationDraft,
   buildAiNarrative,
   buildForecastNarrative,
@@ -36,12 +38,13 @@ const {
 } = analytics;
 
 const dashboardSnapshotDate = SNAPSHOT_DATE ?? "2026-07-08";
+const defaultCsvName = "dx-returns-ecommerce-demo-600.csv";
 
 const root = document.getElementById("root");
 const roles = [
   ["manager", "Ops Manager", "KPI control, overdue pressure, and weekly governance."],
-  ["coordinator", "Coordinator", "Daily follow-up, owners, missing dates, and partner blockers."],
-  ["leadership", "Leadership", "Trend narrative, risk concentration, and partner/market exposure."],
+  ["coordinator", "Coordinator", "Daily follow-up, case owners, missing dates, and sales channel delays."],
+  ["leadership", "Leadership", "Return trends, risk concentration, and exposure by sales channel and market."],
   ["snapshots", "Snapshots", "Snapshot comparison, movement direction, and report distribution."],
 ];
 
@@ -70,7 +73,7 @@ const defaultLlmState = {
 
 const defaultEmailState = {
   recipients: "",
-  subject: "DX Returns Weekly Control Report",
+  subject: WEEKLY_REPORT_TITLE,
   status: "idle",
   message: "",
   error: "",
@@ -83,13 +86,12 @@ const state = {
   pageSize: 25,
   roiInputs: { ...defaultRoiInputs },
   returns: [],
-  sourceName: "Synthetic demo CSV",
+  sourceName: "Synthetic e-commerce demo CSV",
   loadError: "",
   uploadMessage: "",
   validation: null,
   uploadSnapshots: [],
   currentLlmBrief: null,
-  demoCsv: "",
   llm: { ...defaultLlmState },
   email: { ...defaultEmailState },
 };
@@ -102,7 +104,7 @@ async function loadAnalyticsModule() {
     return loaded;
   }
 
-  const response = await fetch(`/src/lib/returns-engine.js?v=${version}`, { cache: "no-store" });
+  const response = await fetch(new URL(modulePath, import.meta.url), { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Returns engine module was incomplete and source reload failed: HTTP ${response.status}`);
   }
@@ -155,19 +157,21 @@ function getLocalSnapshotLabel() {
 }
 
 async function boot() {
-  const response = await fetch(`./src/data/returns.csv?v=20260709-${Date.now()}`, { cache: "no-store" });
+  const response = await fetch(new URL(`./data/${defaultCsvName}`, import.meta.url), { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Unable to load returns CSV: HTTP ${response.status}`);
   }
   const csv = await response.text();
-  if (!csv.trim()) {
-    throw new Error("Returns CSV loaded but was empty.");
+  const validation = validateReturnsCsv(csv);
+  if (!validation.valid) {
+    throw new Error(`Default CSV is missing required columns: ${validation.missingColumns.join(", ")}`);
   }
-  state.returns = enrichReturns(parseReturnsCsv(csv));
-  state.demoCsv = csv;
-  state.sourceName = "Synthetic demo CSV";
-  state.validation = validateReturnsCsv(csv);
-  state.uploadSnapshots = [];
+  const parsed = parseReturnsCsv(csv);
+  if (!parsed.length) {
+    throw new Error("Default CSV contains no return records.");
+  }
+  state.returns = enrichReturns(parsed);
+  state.validation = validation;
   render();
 }
 
@@ -201,8 +205,8 @@ function render() {
       <header class="topbar">
         <div>
           <p class="eyebrow">Synthetic prototype &middot; Snapshot ${dashboardSnapshotDate}</p>
-          <h1>DX Returns Control</h1>
-          <p class="subtitle">Assumption-led visibility layer for mixed returns, overdue control, high-value exposure, and stakeholder-ready reporting.</p>
+          <h1>${DASHBOARD_NAME}</h1>
+          <p class="subtitle">Track online returns, refund delays, and overdue cases across sales channels and markets.</p>
         </div>
         <div class="governance-badge"><span class="glyph">OK</span><span>Human-controlled escalation</span></div>
       </header>
@@ -256,7 +260,7 @@ function dataControls() {
   return `
     <section class="automation-bar">
       <div>
-        <p class="eyebrow">Phase 2 automation</p>
+        <p class="eyebrow">Returns data</p>
         <strong>${escapeHtml(state.sourceName)}</strong>
         <span>${state.returns.length ? `${state.returns.length} rows loaded. Upload replaces the active dataset and adds a snapshot point.` : "Session is empty. Upload a CSV to rebuild the dashboard, or refresh the page to reload the demo dataset."}</span>
         ${validation ? validationSummary(validation) : ""}
@@ -296,7 +300,7 @@ function aboutPrototypePanel() {
       <article class="info-panel">
         <p class="eyebrow">Governance guardrails</p>
         <h3>Humans stay in control</h3>
-        <p>No automated customer, partner, logistics, financial, or closure decisions. Drafts and forecasts are designed for review in a control meeting.</p>
+        <p>Review drafts and forecasts before following up with customers, sales channels, or carriers.</p>
       </article>
       <article class="info-panel">
         <p class="eyebrow">Pilot shape</p>
@@ -357,7 +361,7 @@ function managerView({ aiNarrative, delayThemes, digest, emailState, filteredRet
       ${paginationControls(paginatedReturns)}
     </section>
     <section class="assumption-strip">
-      <strong>Phase 2 boundary:</strong> reports, worklist exports, and message drafts are generated for human review only. No automated email, no autonomous decisions, no real Philips data. Oldest open: ${kpis.oldestOpenId} at ${kpis.oldestOpenAgeDays} days.
+      <strong>Oldest open return</strong> ${kpis.oldestOpenId} at ${kpis.oldestOpenAgeDays} days.
     </section>
   `;
 }
@@ -419,7 +423,7 @@ function leadershipView({ aiNarrative, delayThemes, digest, emailState, forecast
     ${reportPanel(stakeholderReport, true)}
     <section class="three-column">
       ${rankedList("Market pressure", marketBreakdown, "market")}
-      ${rankedList("Partner performance", partnerPerformance, "partner")}
+      ${rankedList("Sales channel performance", partnerPerformance, "partner")}
       <div class="panel">
         <div class="panel-heading">
           <div><p class="eyebrow">Exposure</p><h3>High-value returns</h3></div>
@@ -860,7 +864,7 @@ function filters() {
         <input data-search type="search" value="${escapeHtml(state.filters.search)}" placeholder="ID, owner, market, reason" />
       </label>
       ${selectControl("Market", "market", state.filters.market, options.market)}
-      ${selectControl("Partner", "partner", state.filters.partner, options.partner)}
+      ${selectControl("Sales channel", "partner", state.filters.partner, options.partner)}
       ${selectControl("Status", "status", state.filters.status, options.status)}
       ${selectControl("SLA", "slaState", state.filters.slaState, options.slaState, formatState)}
     </div>
@@ -903,7 +907,7 @@ function returnsTable(items) {
   return `
     <div class="table-wrap register">
       <table>
-        <thead><tr><th>Return</th><th>Market</th><th>Partner</th><th>Status</th><th>SLA</th><th>Age</th><th>Owner</th><th>Value</th><th>Delay reason</th></tr></thead>
+        <thead><tr><th>Return</th><th>Market</th><th>Sales channel</th><th>Status</th><th>SLA</th><th>Age</th><th>Owner</th><th>Value</th><th>Delay reason</th></tr></thead>
         <tbody>
           ${items.map((item) => `
             <tr>
@@ -1057,7 +1061,7 @@ async function handleCsvUpload(event) {
 }
 
 function downloadTemplate() {
-  downloadText("dx-returns-upload-template.csv", buildReturnCsvTemplate(), "text/csv");
+  downloadText("dx-returns-ecommerce-upload-template.csv", buildReturnCsvTemplate(), "text/csv");
 }
 
 function eraseSessionData() {
@@ -1072,7 +1076,6 @@ function eraseSessionData() {
   state.roiInputs = { ...defaultRoiInputs };
   state.uploadSnapshots = [];
   state.currentLlmBrief = null;
-  state.demoCsv = "";
   state.llm = { ...defaultLlmState };
   state.email = { ...defaultEmailState };
   render();
@@ -1080,7 +1083,7 @@ function eraseSessionData() {
 
 function exportWorklist() {
   const worklist = getOverdueWorklist(state.returns);
-  downloadText("dx-returns-escalation-worklist.csv", serializeWorklistCsv(worklist), "text/csv");
+  downloadText("dx-returns-ecommerce-escalation-worklist.csv", serializeWorklistCsv(worklist), "text/csv");
 }
 
 function downloadReport() {
@@ -1089,7 +1092,7 @@ function downloadReport() {
   const marketBreakdown = getMarketBreakdown(state.returns);
   const partnerPerformance = getPartnerPerformance(state.returns);
   const report = buildStakeholderReport({ kpis, marketBreakdown, partnerPerformance, worklist });
-  downloadText("dx-returns-weekly-report.txt", report, "text/plain");
+  downloadText("dx-returns-ecommerce-weekly-report.txt", report, "text/plain");
 }
 
 async function sendReportEmail() {
@@ -1110,7 +1113,7 @@ async function sendReportEmail() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         recipients,
-        subject: state.email.subject || "DX Returns Weekly Control Report",
+        subject: state.email.subject || WEEKLY_REPORT_TITLE,
         body: report,
         evidencePack: buildCurrentLlmBrief(),
       }),
@@ -1161,7 +1164,7 @@ async function copyLlmBrief() {
     await navigator.clipboard.writeText(brief);
     state.llm = { ...state.llm, status: "copied", error: "" };
   } catch {
-    downloadText("dx-returns-llm-evidence-pack.json", brief, "application/json");
+    downloadText("dx-returns-ecommerce-llm-evidence-pack.json", brief, "application/json");
     state.llm = { ...state.llm, status: "copied", error: "" };
   }
   render();
@@ -1233,7 +1236,7 @@ boot().catch((error) => {
         <p class="eyebrow">Startup error</p>
         <h1>Unable to load dashboard</h1>
         <p>${escapeHtml(error.message)}</p>
-        <p>Try a hard refresh first. If this is on Render, confirm the deployed service can serve <code>/src/static-app.js</code>, <code>/src/lib/returns-engine.js</code>, and <code>/src/data/returns.csv</code>.</p>
+        <p>Try refreshing. If the error persists, check whether the deployment serves <code>src/data/${defaultCsvName}</code>.</p>
       </section>
     </main>
   `;

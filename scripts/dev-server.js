@@ -1,6 +1,7 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
+import { DASHBOARD_NAME } from "../src/lib/returns-engine.js";
 
 const root = process.cwd();
 const port = Number(process.env.PORT || 5173);
@@ -45,7 +46,7 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, host, () => {
-  console.log(`DX Returns Control running at http://${host}:${port}`);
+  console.log(`${DASHBOARD_NAME} running at http://${host}:${port}`);
 });
 
 process.on("SIGTERM", () => server.close());
@@ -166,7 +167,7 @@ async function handleEmailReport(request, response) {
         body: String(body.body).slice(0, 20_000),
         evidencePack: body.evidencePack ?? null,
         governance: {
-          source: "DX Returns Control prototype",
+          source: DASHBOARD_NAME,
           humanTriggered: true,
           noAutonomousDecision: true,
         },
