@@ -1,6 +1,6 @@
 # E-commerce DX Returns
 
-An e-commerce returns dashboard for tracking overdue cases, refund delays, and return value across markets, sales channels, and carriers. The dashboard loads 600 synthetic returns when it opens.
+E-commerce returns dashboard for uploading CSV exports, tracking return status and refund delays, and prioritizing overdue cases across markets, sales channels, and carriers. The dashboard loads 600 synthetic returns when it opens.
 
 ## The Problem
 
